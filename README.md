@@ -3,6 +3,7 @@
 Functions to test/check objects.
 
 [![NPM version](https://badge.fury.io/js/teo.png)](http://badge.fury.io/js/teo)
+[![Build Status](https://secure.travis-ci.org/gamtiq/teo.png?branch=master)](http://travis-ci.org/gamtiq/teo)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
 ## Installation
