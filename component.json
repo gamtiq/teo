@@ -1,0 +1,22 @@
+{
+  "name": "teo",
+  "repo": "gamtiq/teo",
+  "description": "Functions to test/check objects",
+  "version": "0.1.0",
+  "keywords": [
+    "test",
+    "check",
+    "object",
+    "utility",
+    "filter",
+    "validate",
+    "data"
+  ],
+  "dependencies": {},
+  "development": {},
+  "license": "MIT",
+  "main": "src/teo.js",
+  "scripts": [
+    "src/teo.js"
+  ]
+}

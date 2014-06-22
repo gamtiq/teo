@@ -1,0 +1,30 @@
+{
+  "name": "teo",
+  "main": [
+    "dist/teo.js", 
+    "dist/teo.min.js"
+  ],
+  "version": "0.1.0",
+  "homepage": "https://github.com/gamtiq/teo",
+  "authors": [
+    "Denis Sikuler"
+  ],
+  "description": "Functions to test/check objects",
+  "keywords": [
+    "test",
+    "check",
+    "object",
+    "utility",
+    "filter",
+    "validate",
+    "data"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
