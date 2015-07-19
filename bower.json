@@ -9,7 +9,7 @@
   "authors": [
     "Denis Sikuler"
   ],
-  "description": "Functions to test/check objects",
+  "description": "Functions to test/check, filter and find objects",
   "keywords": [
     "test",
     "check",
@@ -17,7 +17,9 @@
     "utility",
     "filter",
     "validate",
-    "data"
+    "data",
+    "find",
+    "item"
   ],
   "license": "MIT",
   "ignore": [

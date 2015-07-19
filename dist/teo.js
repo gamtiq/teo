@@ -17,13 +17,13 @@
      * teo
      * https://github.com/gamtiq/teo
      *
-     * Copyright (c) 2014 Denis Sikuler
+     * Copyright (c) 2014-2015 Denis Sikuler
      * Licensed under the MIT license.
      */
 
 
     /**
-     * Functions to test/check objects.
+     * Functions to test/check, filter and find objects.
      * 
      * @module teo
      */
@@ -130,10 +130,99 @@
         return true;
     }
 
+    /**
+     * Form new array containing elements from the source array which conform to the given condition (filter)
+     * or calculate quantity of such elements.
+     * 
+     * @param {Array} list
+     *      Source array to be processed.
+     * @param {Object | Function | Array | String} filter
+     *      Check that should be made for each element in the source array (see {@link module:teo.test test} for details).
+     * @param {Object} [settings]
+     *      Operation settings. Keys are settings names, values are corresponding settings values.
+     *     The following settings are supported:
+     *     
+     *   * `count` (`Boolean`; `false` by default) - if `true`, quantity of elements will be counted and returned as result.
+     *   * `transform` (`Function`; `null` by default) - function that should be called to process elements of the source array
+     *     that conform to the filter; value returned by the function will be included into the result array instead of source element.
+     * @return {Array | Integer}
+     *      Elements from the source array that conform to the filter or quantity of such elements.
+     * @alias module:teo.filterList
+     * @see {@link module:teo.test test}
+     */
+    function filterList(list, filter, settings) {
+        if (! settings) {
+            settings = {};
+        }
+        var bCount = Boolean(settings.count),
+            result = bCount ? 0 : [],
+            transform = settings.transform,
+            nI, nL, obj;
+        for (nI = 0, nL = list.length; nI < nL; nI++) {
+            obj = list[nI];
+            if (test(obj, filter)) {
+                if (bCount) {
+                    result++;
+                }
+                else {
+                    result.push(transform ? transform(obj) : obj);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return the index of the first element in the array that conforms to the given condition (filter).
+     * 
+     * @param {Array} list
+     *      Array to be searched.
+     * @param {Object | Function | Array | String} filter
+     *      Check that should be used to find element (see {@link module:teo.test test} for details).
+     * @return {Integer}
+     *      The index of the first found element or -1 when the array does not contain any element
+     *      that conforms to the given condition.
+     * @alias module:teo.findItemIndex
+     * @see {@link module:teo.test test}
+     */
+    function findItemIndex(list, filter) {
+        var nI = 0,
+            nL = list.length;
+        while (nI < nL) {
+            if (test(list[nI], filter)) {
+                return nI;
+            }
+            nI++;
+        }
+        return -1;
+    }
+
+    /**
+     * Return the first element in the array that conforms to the given condition (filter).
+     * 
+     * @param {Array} list
+     *      Array to be searched.
+     * @param {Object | Function | Array | String} filter
+     *      Check that should be used to find element (see {@link module:teo.test test} for details).
+     * @return {Any}
+     *      The first found element or `undefined` when the array does not contain any element
+     *      that conforms to the given condition.
+     * @alias module:teo.findItem
+     * @see {@link module:teo.findItemIndex findItemIndex}
+     */
+    function findItem(list, filter) {
+        var nI = findItemIndex(list, filter),
+            result;
+        return nI > -1 ? list[nI] : result;
+    }
+
 
     // Exports
 
     module.exports = {
+        filterList: filterList,
+        findItem: findItem,
+        findItemIndex: findItemIndex,
         isEmpty: isEmpty,
         isObject: isObject,
         test: test

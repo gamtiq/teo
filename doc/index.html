@@ -72,43 +72,26 @@
 
 
     <section class="readme-section">
-        <article><h1>teo</h1>
-<p>Functions to test/check objects.</p>
+        <article><h1>teo</h1><p>Functions to test/check, filter and find objects.</p>
 <p><a href="http://badge.fury.io/js/teo"><img src="https://badge.fury.io/js/teo.png" alt="NPM version"></a>
+<a href="http://travis-ci.org/gamtiq/teo"><img src="https://secure.travis-ci.org/gamtiq/teo.png?branch=master" alt="Build Status"></a>
 <a href="http://gruntjs.com/"><img src="https://cdn.gruntjs.com/builtwith.png" alt="Built with Grunt"></a></p>
-<h2>Installation</h2>
-<h3>Node</h3>
-<pre><code>npm install teo</code></pre>
-<h3><a href="https://github.com/component/component">Component</a></h3>
-<pre><code>component install gamtiq/teo</code></pre>
-<h3><a href="http://jamjs.org">Jam</a></h3>
-<pre><code>jam install teo</code></pre>
-<h3><a href="http://bower.io">Bower</a></h3>
-<pre><code>bower install teo</code></pre>
-<h3>AMD, &lt;script&gt;</h3>
-<p>Use <code>dist/teo.js</code> or <code>dist/teo.min.js</code> (minified version).</p>
-<h2>Usage</h2>
-<h3>Node, Component</h3>
-<pre><code class="lang-js">var teo = require(&quot;teo&quot;);</code></pre>
-<h3>Jam</h3>
-<pre><code class="lang-js">require([&quot;teo&quot;], function(teo) {
+<h2>Installation</h2><h3>Node</h3><pre class="prettyprint source"><code>npm install teo</code></pre><h3><a href="https://github.com/component/component">Component</a></h3><pre class="prettyprint source"><code>component install gamtiq/teo</code></pre><h3><a href="http://jamjs.org">Jam</a></h3><pre class="prettyprint source"><code>jam install teo</code></pre><h3><a href="http://bower.io">Bower</a></h3><pre class="prettyprint source"><code>bower install teo</code></pre><h3><a href="http://jspm.io">JSPM</a></h3><pre class="prettyprint source"><code>jspm install teo</code></pre><h3><a href="http://spmjs.io">SPM</a></h3><pre class="prettyprint source"><code>spm install teo</code></pre><h3>AMD, &lt;script&gt;</h3><p>Use <code>dist/teo.js</code> or <code>dist/teo.min.js</code> (minified version).</p>
+<h2>Usage</h2><h3>Node, Component, JSPM, SPM</h3><pre class="prettyprint source lang-js"><code>var teo = require(&quot;teo&quot;);</code></pre><h3><a href="http://duojs.org">Duo</a></h3><pre class="prettyprint source lang-js"><code>var teo = require(&quot;gamtiq/teo&quot;);
+...</code></pre><h3>Jam</h3><pre class="prettyprint source lang-js"><code>require([&quot;teo&quot;], function(teo) {
     ...
-});</code></pre>
-<h3>AMD</h3>
-<pre><code class="lang-js">define([&quot;path/to/dist/teo.js&quot;], function(teo) {
+});</code></pre><h3>JSPM</h3><pre class="prettyprint source lang-js"><code>System.import(&quot;teo&quot;).then(function(teo) {
     ...
-});</code></pre>
-<h3>Bower, &lt;script&gt;</h3>
-<pre><code class="lang-html">
-&lt;!-- Use bower_components/teo/dist/teo.js if the library was installed by Bower --&gt;
+});</code></pre><h3>AMD</h3><pre class="prettyprint source lang-js"><code>define([&quot;path/to/dist/teo.js&quot;], function(teo) {
+    ...
+});</code></pre><h3>Bower, &lt;script&gt;</h3><pre class="prettyprint source lang-html"><code>
+&lt;!-- Use bower_components/teo/dist/teo.js if the library was installed by Bower -->
 
-&lt;script type=&quot;text/javascript&quot; src=&quot;path/to/dist/teo.js&quot;&gt;&lt;/script&gt;
-&lt;script type=&quot;text/javascript&quot;&gt;
+&lt;script type=&quot;text/javascript&quot; src=&quot;path/to/dist/teo.js&quot;>&lt;/script>
+&lt;script type=&quot;text/javascript&quot;>
     // teo is available via teo field of window object
     ...
-&lt;/script&gt;</code></pre>
-<h3>Examples</h3>
-<pre><code class="lang-js">teo.isObject(teo);   // true
+&lt;/script></code></pre><h3>Examples</h3><pre class="prettyprint source lang-js"><code>teo.isObject(teo);   // true
 teo.isObject(null);   // false
 teo.isObject([]);   // false
 
@@ -121,22 +104,39 @@ teo.test({a: 1}, {a: 2});   // false
 teo.test({a: 1, b: 2, c: 3, d: 4}, {c: 3, a: 1});   // true
 
 teo.test(1, teo.isObject);   // false
-teo.test(&quot;&quot;, false);   // true</code></pre>
-<p>See tests for additional examples.</p>
-<h2>API</h2>
-<h3>isObject(value): Boolean</h3>
-<p>Check whether value is real object (not array nor function).</p>
-<h3>isEmpty(obj: Object): Boolean</h3>
-<p>Check whether object do not contain any fields.</p>
-<h3>test(obj: Object, filter: Object | Function | Array | String): Boolean</h3>
-<p>Check whether object conforms to specified condition/filter.</p>
+teo.test(&quot;&quot;, false);   // true
+
+var personList = [
+    {name: &quot;Adam&quot;, age: 27, married: true, children: 1},
+    {name: &quot;Eva&quot;, age: 23, married: true, children: 1},
+    {name: &quot;Carl&quot;, age: 59, married: true, children: 3},
+    {name: &quot;Daniel&quot;, age: 17, married: false, children: 0},
+    {name: &quot;Gloria&quot;, age: 28, married: false, children: 1},
+    {name: &quot;Viola&quot;, age: 35, married: true, children: 4},
+    {name: &quot;Leonardo&quot;, age: 61, married: false, children: 1},
+    {name: &quot;Patricia&quot;, age: 44, married: false, children: 2}
+];
+
+teo.filterList([0, &quot;&quot;, true, &quot;ret&quot;], &quot;true&quot;);   // [true, &quot;ret&quot;]
+teo.filterList([3, -4, 2, 10, 7, -9, 5], function(n) {return n >= 3;}, {count: true});   // 4
+teo.filterList(personList,
+                function(person) {return person.age > 30;},
+                {transform: function(person) {return person.name;}});   // [&quot;Carl&quot;, &quot;Viola&quot;, &quot;Leonardo&quot;, &quot;Patricia&quot;]
+
+teo.findItemIndex(personList, {married: false, children: 1});   // 4
+teo.findItem(personList, function(person) {return person.age > 30 && ! person.married;});   // {name: &quot;Leonardo&quot;, age: 61, married: false, children: 1}</code></pre><p>See tests for additional examples.</p>
+<h2>API</h2><h3>isObject(value): Boolean</h3><p>Check whether value is real object (not array nor function).</p>
+<h3>isEmpty(obj: Object): Boolean</h3><p>Check whether object do not contain any fields.</p>
+<h3>test(obj: Object, filter: Object | Function | Array | String): Boolean</h3><p>Check whether object conforms to specified condition/filter.</p>
+<h3>filterList(list: Array, filter: Object | Function | Array | String, [settings: Object]): Array | Integer</h3><p>Form new array containing elements from the source array which conform to the given condition (filter)
+or calculate quantity of such elements.</p>
+<h3>findItemIndex(list: Array, filter: Object | Function | Array | String): Integer</h3><p>Return the index of the first element in the array that conforms to the given condition (filter).</p>
+<h3>findItem(list: Array, filter: Object | Function | Array | String): Any</h3><p>Return the first element in the array that conforms to the given condition (filter).</p>
 <p>See <code>doc</code> folder for details.</p>
-<h2>Contributing</h2>
-<p>In lieu of a formal styleguide, take care to maintain the existing coding style.
+<h2>Contributing</h2><p>In lieu of a formal styleguide, take care to maintain the existing coding style.
 Add unit tests for any new or changed functionality.
 Lint and test your code using <a href="http://gruntjs.com/">Grunt</a>.</p>
-<h2>License</h2>
-<p>Copyright (c) 2014 Denis Sikuler<br>Licensed under the MIT license.</p></article>
+<h2>License</h2><p>Copyright (c) 2014-2015 Denis Sikuler<br>Licensed under the MIT license.</p></article>
     </section>
 
 
@@ -152,13 +152,13 @@ Lint and test your code using <a href="http://gruntjs.com/">Grunt</a>.</p>
 					
 					
 		<span class="copyright">
-		Copyright (c) 2014 Denis Sikuler
+		Copyright (c) 2014-2015 Denis Sikuler
 		</span>
 					<br />
 					
 		<span class="jsdoc-message">
-		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-06-22T20:03:46+04:00 using the <a
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a>
+		on 2015-07-19T15:38:24+03:00 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
@@ -180,28 +180,35 @@ Lint and test your code using <a href="http://gruntjs.com/">Grunt</a>.</p>
 
 	<script>
 		$( function () {
+			$( "[id*='$']" ).each( function () {
+				var $this = $( this );
+
+				$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+			} );
+
 			$( "#toc" ).toc( {
 				anchorName  : function ( i, heading, prefix ) {
 					return $( heading ).attr( "id" ) || ( prefix + i );
 				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
-				scrollTo    : 60
+				scrollTo    : "100px"
 			} );
+
 			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
 			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
-			$('.dropdown-toggle').dropdown();
+			$( '.dropdown-toggle' ).dropdown();
 //			$( ".tutorial-section pre, .readme-section pre" ).addClass( "sunlight-highlight-javascript" ).addClass( "linenums" );
 
 			$( ".tutorial-section pre, .readme-section pre" ).each( function () {
 				var $this = $( this );
 
-				var example = $this.find("code" );
+				var example = $this.find( "code" );
 				exampleText = example.html();
 				var lang = /{@lang (.*?)}/.exec( exampleText );
 				if ( lang && lang[1] ) {
 					exampleText = exampleText.replace( lang[0], "" );
-					example.html(exampleText);
+					example.html( exampleText );
 					lang = lang[1];
 				} else {
 					lang = "javascript";
@@ -219,17 +226,19 @@ Lint and test your code using <a href="http://gruntjs.com/">Grunt</a>.</p>
 
 			Sunlight.highlightAll( {
 				lineNumbers : true,
-				showMenu:true,
-				enableDoclinks:true
+				showMenu : true,
+				enableDoclinks : true
+			} );
 		} );
-		} );
+	 </script>
 
-	</script>
 
-	<!--Google Analytics-->
-	
 
 	<!--Navigation and Symbol Display-->
+	
+
+
+	<!--Google Analytics-->
 	
 
 </body>
