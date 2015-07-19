@@ -1,7 +1,7 @@
 {
   "name": "teo",
   "description": "Functions to test/check, filter and find objects",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/gamtiq/teo",
   "author": {
     "name": "Denis Sikuler"

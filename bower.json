@@ -4,7 +4,7 @@
     "dist/teo.js", 
     "dist/teo.min.js"
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/gamtiq/teo",
   "authors": [
     "Denis Sikuler"
