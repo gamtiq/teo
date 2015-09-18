@@ -4,12 +4,12 @@
     "dist/teo.js", 
     "dist/teo.min.js"
   ],
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "https://github.com/gamtiq/teo",
   "authors": [
     "Denis Sikuler"
   ],
-  "description": "Functions to test/check, filter, find and process objects",
+  "description": "Functions to test/check, filter, find and process/transform objects",
   "keywords": [
     "test",
     "check",
@@ -21,6 +21,7 @@
     "find",
     "map",
     "process",
+    "transform",
     "item"
   ],
   "license": "MIT",
