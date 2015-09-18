@@ -1,6 +1,6 @@
 {
   "name": "teo",
-  "description": "Functions to test/check, filter and find objects",
+  "description": "Functions to test/check, filter, find and process objects",
   "version": "0.1.1",
   "homepage": "https://github.com/gamtiq/teo",
   "author": {
@@ -41,6 +41,8 @@
     "validate",
     "data",
     "find",
+    "map",
+    "process",
     "item"
   ],
   "jam": {

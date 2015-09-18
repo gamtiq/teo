@@ -1,7 +1,7 @@
 {
   "name": "teo",
   "repo": "gamtiq/teo",
-  "description": "Functions to test/check, filter and find objects",
+  "description": "Functions to test/check, filter, find and process objects",
   "version": "0.1.1",
   "keywords": [
     "test",
@@ -12,6 +12,8 @@
     "validate",
     "data",
     "find",
+    "map",
+    "process",
     "item"
   ],
   "dependencies": {},

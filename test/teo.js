@@ -3,7 +3,8 @@
 
 // Tests for teo
 describe("teo", function() {
-    var smallList = [0, "", true, "ret"],
+    var bSymbol = typeof Symbol === "function",
+        smallList = [0, "", true, "ret"],
         numList = [1, 2, 3, 4, 5, 6, 89, 3, 5, 41],
         strList = ["a", "b", "JS", "aa", "cde", "java", "perl", "js", "Python"],
         personList = [
@@ -75,31 +76,71 @@ describe("teo", function() {
     });
 
     
-    describe(".isEmpty(obj)", function() {
-        /*jshint expr:true*/
+    describe(".isEmpty", function() {
         var isEmpty = teo.isEmpty;
-        it("should return true", function() {
-            expect( isEmpty({}) )
-                .be["true"];
-            expect( isEmpty(new Date()) )
-                .be["true"];
-        });
-        it("should return false", function() {
-            var d = new Date(),
-                f = function() {};
-            d.created = new Date().getTime();
-            f.toString = function() {
-                return "something beautiful";
-            };
+        
+        describe("isEmpty(obj)", function() {
+            /*jshint expr:true*/
+            it("should return true", function() {
+                expect( isEmpty({}) )
+                    .be["true"];
+                expect( isEmpty(new Date()) )
+                    .be["true"];
+            });
+            it("should return false", function() {
+                var d = new Date(),
+                    f = function() {};
+                d.created = new Date().getTime();
+                f.toString = function() {
+                    return "something beautiful";
+                };
+                
+                expect( isEmpty({a: 1}) )
+                    .be["false"];
+                expect( isEmpty(teo) )
+                    .be["false"];
+                expect( isEmpty(d) )
+                    .be["false"];
+                expect( isEmpty(f) )
+                    .be["false"];
+            });
             
-            expect( isEmpty({a: 1}) )
-                .be["false"];
-            expect( isEmpty(teo) )
-                .be["false"];
-            expect( isEmpty(d) )
-                .be["false"];
-            expect( isEmpty(f) )
-                .be["false"];
+            if (bSymbol) {
+                it("should return false for an object with symbol property keys", function() {
+                    var obj = {};
+                    obj[Symbol("a")] = Symbol("b");
+                    
+                    expect( isEmpty(obj) )
+                        .be["false"];
+                });
+            }
+        });
+        
+        describe("isEmpty(obj, true)", function() {
+            /*jshint expr:true*/
+            it("should return true", function() {
+                expect( isEmpty({}, true) )
+                    .be["true"];
+                expect( isEmpty(new Date(), true) )
+                    .be["true"];
+            });
+            
+            if (bSymbol) {
+                it("should return true for an object with symbol property keys", function() {
+                    var obj = {};
+                    obj[Symbol("a")] = Symbol("b");
+                    
+                    expect( isEmpty(obj, true) )
+                        .be["true"];
+                });
+            }
+            
+            it("should return false", function() {
+                expect( isEmpty({some: "value", key: "field", n: null}, true) )
+                    .be["false"];
+                expect( isEmpty(teo, true) )
+                    .be["false"];
+            });
         });
     });
     
@@ -681,6 +722,480 @@ describe("teo", function() {
                 .equal(personList[4]);
             expect( findItem(personList, function(person) {return person.children === 0;}) )
                 .equal(personList[3]);
+        });
+    });
+    
+    
+    describe(".map", function() {
+        function toString(data) {
+            var value = data.value;
+            return typeof value === "function" ? "<function>" : String(value);
+        }
+        
+        function change(data, value) {
+            /*jshint laxbreak:true*/
+            return arguments.length > 1 
+                        ? value 
+                        : (data.data === undef ? null : data.data);
+        }
+        
+        function objFilter(data) {
+            var value = data.value;
+            return value === Object(value);
+        }
+        
+        function scalarFilter(data) {
+            var value = data.value;
+            return value !== Object(value);
+        }
+        
+        function numberFilter(data) {
+            return typeof data.value === "number";
+        }
+        
+        function stringFilter(data) {
+            return typeof data.value === "string";
+        }
+        
+        function excludeFieldFilter(data, field) {
+            /*jshint laxbreak:true*/
+            var exclude = arguments.length > 1
+                            ? field
+                            : data.data;
+            if (! Array.isArray(exclude)) {
+                exclude = [exclude];
+            }
+            return exclude.indexOf(data.field) === -1;
+        }
+        
+        var map = teo.map,
+            source = {
+                a: 1,
+                b: 2,
+                c: {
+                    d: 4,
+                    e: ["a", 2],
+                    f: {
+                        g: null,
+                        h: {}
+                    }
+                },
+                s: "str",
+                get: function(data) {
+                    return this.a + "-" + toString(data);
+                }
+            },
+            sourceGet = function(data) {
+                return source.get(data);
+            },
+            changeToZero = function(data) {
+                return change(data, 0);
+            },
+            changeToEmptyStr = function(data) {
+                return change(data, "");
+            };
+        
+        describe("map(source, action)", function() {
+            it("should return object containing modified fields of source object", function() {
+                expect( map({}, toString) )
+                    .eql({});
+                expect( map(source, toString) )
+                    .eql({a: "1", b: "2", c: "[object Object]", get: "<function>", s: "str"});
+                expect( map(source, sourceGet) )
+                    .eql({a: "1-1", b: "1-2", c: "1-[object Object]", get: "1-<function>", s: "1-str"});
+                expect( map({abc: "abc", next: "value"}, sourceGet) )
+                    .eql({abc: "1-abc", next: "1-value"});
+                expect( map({a: "delta", b: "pi"}, {a: "delta", execute: source.get}) )
+                    .eql({a: "delta-delta", b: "delta-pi"});
+                
+                expect( map([1, "a", null], toString) )
+                    .eql({0: "1", 1: "a", 2: "null"});
+                expect( map([], toString) )
+                    .eql({});
+            });
+        });
+        
+        describe("map(source, action, {data: value})", function() {
+            it("should use given data for operation", function() {
+                expect( map({f: 0, v: 1}, change, {data: "abc"}) )
+                    .eql({f: "abc", v: "abc"});
+                
+                expect( map({a: {}, b: "---"}, change, {data: changeToZero}) )
+                    .eql({a: changeToZero, b: changeToZero});
+                
+                expect( map(source, change, {data: 1}) )
+                    .eql({a: 1, b: 1, c: 1, get: 1, s: 1});
+            });
+        });
+        
+        describe("map(source, action, {destination: obj})", function() {
+            it("should save fields into destination object", function() {
+                var dest;
+                
+                dest = {x: 8};
+                expect( map({}, toString, {destination: dest}) )
+                    .equal(dest);
+                expect( dest )
+                    .eql({x: 8});
+                
+                dest = {x: 8};
+                expect( map({a: null, b: 3}, toString, {destination: dest}) )
+                    .equal(dest);
+                expect( dest )
+                    .eql({x: 8, a: "null", b: "3"});
+                
+                dest = {x: 8};
+                expect( map(source, toString, {destination: dest}) )
+                    .equal(dest);
+                expect( dest )
+                    .eql({x: 8, a: "1", b: "2", c: "[object Object]", get: "<function>", s: "str"});
+                
+                dest = {x: 8};
+                expect( map(source, sourceGet, {destination: dest}) )
+                    .equal(dest);
+                expect( dest )
+                    .eql({x: 8, a: "1-1", b: "1-2", c: "1-[object Object]", get: "1-<function>", s: "1-str"});
+            });
+        });
+        
+        describe("map(source, action, {filter: filterValue})", function() {
+            it("should change only those fields that satisfy filter", function() {
+                expect( map({field: 1}, toString, {filter: stringFilter}) )
+                    .eql({field: 1});
+                expect( map({field: 1, u: undef}, toString, {filter: numberFilter}) )
+                    .eql({field: "1", u: undef});
+                
+                expect( map(source, toString, {filter: scalarFilter}) )
+                    .eql({a: "1", b: "2", c: source.c, get: source.get, s: "str"});
+                
+                expect( map(source, sourceGet, {filter: numberFilter}) )
+                    .eql({a: "1-1", b: "1-2", c: source.c, get: source.get, s: "str"});
+                expect( map(source, sourceGet, {filter: stringFilter}) )
+                    .eql({a: 1, b: 2, c: source.c, get: source.get, s: "1-str"});
+                
+                expect( map(source, change, {filter: objFilter}) )
+                    .eql({a: 1, b: 2, c: null, get: null, s: "str"});
+                expect( map(source, changeToZero, {filter: scalarFilter}) )
+                    .eql({a: 0, b: 0, c: source.c, get: source.get, s: 0});
+                expect( map(source, changeToEmptyStr, {filter: numberFilter}) )
+                    .eql({a: "", b: "", c: source.c, get: source.get, s: "str"});
+                
+                expect( map(source, sourceGet, {filter: {field: "s"}}) )
+                    .eql({a: 1, b: 2, c: source.c, get: source.get, s: "1-str"});
+            });
+        });
+        
+        describe("map(source, action, {filter: filterValue, exclusionFilter: true})", function() {
+            it("should include in result only those fields that satisfy filter", function() {
+                expect( map({field: 1}, toString, {filter: stringFilter, exclusionFilter: true}) )
+                    .eql({});
+                expect( map({field: 1, date: new Date()}, toString, {filter: numberFilter, exclusionFilter: true}) )
+                    .eql({field: "1"});
+                
+                expect( map(source, toString, {filter: scalarFilter, exclusionFilter: true}) )
+                    .eql({a: "1", b: "2", s: "str"});
+                
+                expect( map(source, sourceGet, {filter: numberFilter, exclusionFilter: true}) )
+                    .eql({a: "1-1", b: "1-2"});
+                expect( map(source, sourceGet, {filter: stringFilter, exclusionFilter: true}) )
+                    .eql({s: "1-str"});
+                
+                expect( map(source, change, {filter: objFilter, exclusionFilter: true}) )
+                    .eql({c: null, get: null});
+                expect( map(source, changeToZero, {filter: scalarFilter, exclusionFilter: true}) )
+                    .eql({a: 0, b: 0, s: 0});
+                expect( map(source, changeToEmptyStr, {filter: numberFilter, exclusionFilter: true}) )
+                    .eql({a: "", b: ""});
+                
+                expect( map(source, change, {filter: stringFilter, exclusionFilter: true, data: change}) )
+                    .eql({s: change});
+            });
+        });
+        
+        describe("map(source, action, {recursion: true})", function() {
+            it("should recursively process fields that have object value", function() {
+                expect( map({a: {b: 123}}, toString, {recursion: true}) )
+                    .eql({
+                            a: {
+                                b: "123"
+                            }
+                        });
+                
+                expect( map(source, toString, {recursion: true}) )
+                    .eql({
+                            a: "1", 
+                            b: "2", 
+                            c: {
+                                d: "4",
+                                e: {
+                                    0: "a", 
+                                    1: "2"
+                                },
+                                f: {
+                                    g: "null",
+                                    h: {}
+                                }
+                            }, 
+                            get: "<function>", 
+                            s: "str"
+                        });
+                
+                expect( map(source, toString, {recursion: true, filter: excludeFieldFilter, data: ["e", "b"]}) )
+                    .eql({
+                            a: "1", 
+                            b: 2, 
+                            c: {
+                                d: "4",
+                                e: ["a", 2],
+                                f: {
+                                    g: "null",
+                                    h: {}
+                                }
+                            }, 
+                            get: "<function>", 
+                            s: "str"
+                        });
+                
+                expect( map({a: toString, b: {c: source}, d: 9}, toString, {recursion: true, filter: excludeFieldFilter, data: ["a", "e", "g"]}) )
+                    .eql({
+                            a: toString,
+                            b: {
+                                c: {
+                                    a: 1, 
+                                    b: "2", 
+                                    c: {
+                                        d: "4",
+                                        e: ["a", 2],
+                                        f: {
+                                            g: null,
+                                            h: {}
+                                        }
+                                    }, 
+                                    get: "<function>", 
+                                    s: "str"
+                                }
+                            },
+                            d: "9"
+                        });
+            });
+        });
+        
+        describe("map(source, action, {recursion: true, passValueInRecursion: true})", function() {
+            it("should recursively process fields that have object value and modify values of source object", function() {
+                var obj1, obj2, result, subObj;
+                
+                obj1 = {b: ""};
+                expect( map({a: obj1}, change, {recursion: true, passValueInRecursion: true, data: 4}) )
+                    .eql(result = {a: obj1});
+                expect( result.a )
+                    .equal(obj1);
+                expect( obj1 )
+                    .eql({b: 4});
+                
+                obj1 = {f: null};
+                subObj = {
+                    d: "extra"
+                };
+                obj2 = {
+                    a: 300,
+                    c: "more",
+                    obj: subObj
+                };
+                expect( map({a: obj1, b: obj2}, change, {recursion: true, passValueInRecursion: true, data: change, filter: [excludeFieldFilter, null, "c"]}) )
+                    .eql(result = {a: obj1, b: obj2});
+                expect( result.a )
+                    .equal(obj1);
+                expect( obj1 )
+                    .eql({f: change});
+                expect( result.b )
+                    .equal(obj2);
+                expect( obj2 )
+                    .eql({a: change, c: "more", obj: subObj});
+                expect( obj2.obj )
+                    .equal(subObj);
+                expect( subObj )
+                    .eql({d: change});
+            });
+        });
+        
+        describe("map(source, action, {rename: renameMap})", function() {
+            it("should change names of processed or copied fields in destination object", function() {
+                var obj, result;
+                
+                expect( map({field: 1}, toString, {rename: {field: "result"}}) )
+                    .eql({result: "1"});
+                
+                expect( map(source, toString, {rename: {c: "obj", b: "beta"}}) )
+                    .eql({a: "1", beta: "2", obj: "[object Object]", get: "<function>", s: "str"});
+                expect( source )
+                    .contain.key("b");
+                expect( source.b )
+                    .equal(2);
+                expect( source )
+                    .contain.key("c");
+                expect( source.c )
+                    .a("object");
+                
+                expect( map(source, change, {recursion: true, rename: {s: "str", c: "complex", e: "ar", h: "last"}, data: "changed"}) )
+                    .eql({
+                            a: "changed", 
+                            b: "changed", 
+                            complex: {
+                                d: "changed",
+                                ar: {
+                                    0: "changed",
+                                    1: "changed"
+                                },
+                                f: {
+                                    g: "changed",
+                                    last: {}
+                                }
+                            }, 
+                            get: "changed", 
+                            str: "changed"
+                        });
+                
+                obj = {
+                    a: 3,
+                    b: {
+                        c: "value",
+                        d: {
+                            e: 2
+                        }
+                    }
+                };
+                expect( map(obj, change, {destination: obj, recursion: true, rename: {b: "obj", a: "astra", e: "last"}, filter: [excludeFieldFilter, null, ["e", "a"]]}) )
+                    .eql({
+                            a: 3,
+                            obj: {
+                                c: null,
+                                d: {
+                                    last: 2
+                                }
+                            }
+                        });
+                
+                obj = {
+                    a: 3,
+                    b: {
+                        c: "value",
+                        d: {
+                            e: 2
+                        }
+                    }
+                };
+                expect( map(obj, change, {recursion: true, passValueInRecursion: true, rename: {b: "obj", e: "last"}, filter: [excludeFieldFilter, null, "e"]}) )
+                    .eql({
+                            a: null,
+                            obj: {
+                                c: null,
+                                d: {
+                                    e: 2
+                                }
+                            }
+                        });
+                
+                obj = {
+                    a: 3,
+                    b: {
+                        c: "value",
+                        d: {
+                            e: 2
+                        },
+                        f: {
+                            g: {
+                                h: 1,
+                                i: "zero"
+                            }
+                        }
+                    }
+                };
+                result = map(obj,
+                                change,
+                                {
+                                    destination: obj,
+                                    recursion: true,
+                                    passValueInRecursion: true,
+                                    rename: {b: "obj", d: "d1", g: "sub"},
+                                    filter: [excludeFieldFilter, null, ["c", "e", "f"]]
+                                });
+                expect( result )
+                    .equal(obj);
+                expect( result )
+                    .eql({
+                            a: null,
+                            obj: {
+                                c: "value",
+                                d1: {
+                                    e: 2
+                                },
+                                f: {
+                                    g: {
+                                        h: 1,
+                                        i: "zero"
+                                    }
+                                }
+                            }
+                        });
+            });
+        });
+        
+        describe("map(source, action, settings)", function() {
+            it("should return object containing processed fields of source object according to settings", function() {
+                expect( map(source, changeToEmptyStr, {filter: [excludeFieldFilter, null, "c"], rename: {c: "skipped"}}) )
+                    .eql({a: "", b: "", skipped: source.c, get: "", s: ""});
+                
+                expect( map(source, changeToZero, {recursion: true, filter: [excludeFieldFilter, null, ["e", "f", "d"]], rename: {d: "delta", g: "gamma"}}) )
+                    .eql({
+                            a: 0, 
+                            b: 0, 
+                            c: {
+                                delta: 4,
+                                e: ["a", 2],
+                                f: {
+                                    g: null,
+                                    h: {}
+                                }
+                            }, 
+                            get: 0, 
+                            s: 0
+                        });
+                
+                expect( map(source, change, {recursion: true, data: "data", filter: [excludeFieldFilter, null, ["g", "b", "e"]], rename: {b: 0, f: 100}}) )
+                    .eql({
+                            a: "data", 
+                            0: 2, 
+                            c: {
+                                d: "data",
+                                e: ["a", 2],
+                                100: {
+                                    g: null,
+                                    h: {}
+                                }
+                            }, 
+                            get: "data", 
+                            s: "data"
+                        });
+                
+                expect( map(source, change, 
+                            {
+                                recursion: true, 
+                                data: sourceGet, 
+                                filter: [excludeFieldFilter, null, ["g", "b", "e", "get"]], 
+                                exclusionFilter: true, 
+                                rename: {b: 0, f: "___", s: "data"}
+                            }) )
+                    .eql({
+                            a: sourceGet, 
+                            c: {
+                                d: sourceGet,
+                                ___: {
+                                    h: {}
+                                }
+                            }, 
+                            data: sourceGet
+                        });
+            });
         });
     });
     

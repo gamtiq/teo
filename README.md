@@ -1,6 +1,6 @@
 # teo
 
-Functions to test/check, filter and find objects.
+Functions to test/check, filter, find and process objects.
 
 [![NPM version](https://badge.fury.io/js/teo.png)](http://badge.fury.io/js/teo)
 [![Build Status](https://secure.travis-ci.org/gamtiq/teo.png?branch=master)](http://travis-ci.org/gamtiq/teo)
@@ -96,7 +96,12 @@ teo.isObject(null);   // false
 teo.isObject([]);   // false
 
 teo.isEmpty(teo);   // false
-teo.isEmpty([]);   // true
+teo.isEmpty([], true);   // true
+
+var obj = {};
+obj[Symbol("a")] = null;
+teo.isEmpty(obj);   // false
+teo.isEmpty(obj, true);   // true
 
 teo.test({}, "true");   // true
 teo.test({}, {});   // true
@@ -126,6 +131,54 @@ teo.filterList(personList,
 teo.findItemIndex(personList, {married: false, children: 1});   // 4
 teo.findItem(personList, function(person) {return person.age > 30 && ! person.married;});   // {name: "Leonardo", age: 61, married: false, children: 1}
 
+teo.map({a: 1, b: 2, c: null, d: "delta", e: null, f: undefined},
+        function(context) {return false;},
+        {filter: {value: null}});          // {a: 1, b: 2, c: false, d: "delta", e: false, f: undefined}
+
+
+function convert(context) {
+    var value = context.value,
+        bNoValue = value == null,
+        sType = typeof value;
+    if (context.test) {
+        return bNoValue || sType === "object" || (sType === "string" && /^-?\d+$/.test(value));
+    }
+    else {
+        return bNoValue
+                ? 0
+                : Number(value);
+    }
+}
+
+teo.map({
+            a: "abc",
+            b: "25",
+            c: {
+                d: null,
+                e: "eclipse",
+                f: {
+                    g: undefined,
+                    h: "-59",
+                    i: "JS 2015"
+                }
+            }
+        },
+        convert,
+        {filter: convert, recursion: true});
+// returns
+// {
+//      a: "abc",
+//      b: 25,
+//      c: {
+//          d: 0,
+//          e: "eclipse",
+//          f: {
+//              g: 0,
+//              h: -59,
+//              i: "JS 2015"
+//          }
+//      }
+//  }
 ```
 
 See tests for additional examples.
@@ -136,7 +189,7 @@ See tests for additional examples.
 
 Check whether value is real object (not array nor function).
 
-### isEmpty(obj: Object): Boolean
+### isEmpty(obj: Object, [ignoreSymbolFields: Boolean]): Boolean
 
 Check whether object do not contain any fields.
 
@@ -156,6 +209,10 @@ Return the index of the first element in the array that conforms to the given co
 ### findItem(list: Array, filter: Object | Function | Array | String): Any
 
 Return the first element in the array that conforms to the given condition (filter).
+
+### map(source: Object, action: Function | Object, [settings: Object]): Object
+
+Execute the specified action for fields of the object and return the object containing results of processing.
 
 See `doc` folder for details.
 

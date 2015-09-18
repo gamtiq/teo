@@ -715,7 +715,7 @@ that conform to the filter; value returned by the function will be included into
         
             
 <dt>
-    <h4 class="name" id=".isEmpty"><span class="type-signature">&lt;static> </span>isEmpty<span class="signature">(obj)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".isEmpty"><span class="type-signature">&lt;static> </span>isEmpty<span class="signature">(obj, <span class="optional">ignoreSymbolFields</span>)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
     
     
 </dt>
@@ -745,6 +745,8 @@ that conform to the filter; value returned by the function will be included into
 		<th>Type</th>
 
 		
+		<th>Argument</th>
+		
 
 		
 
@@ -770,10 +772,53 @@ that conform to the filter; value returned by the function will be included into
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last"><p>The object to check.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>ignoreSymbolFields</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Whether fields whose key is a Symbol value should be ignored.
+     If <code>true</code>, the object will not be checked for presence of fields with symbol keys.
+     <code>false</code> by default.</p></td>
         </tr>
 
 	
@@ -977,6 +1022,260 @@ that conform to the filter; value returned by the function will be included into
 	<dd>
 		
 <span class="param-type">Boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id=".map"><span class="type-signature">&lt;static> </span>map<span class="signature">(source, action, <span class="optional">settings</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Execute the specified action for fields of the object and return the object containing results of processing.</p>
+<p>The object with the following fields is passed as parameter into action and filter functions:</p>
+<ul>
+<li><code>data</code> (any type) - any data that are accessible during filtration or execution of action;
+   see <code>data</code> setting below.</li>
+<li><code>field</code> (<code>String</code>) - name of object's field that is being processed.</li>
+<li><code>obj</code> (<code>Object</code>) - reference to the object that is being processed.</li>
+<li><code>test</code> (<code>Boolean</code>) - specifies whether filtration or action is being executed;
+   this field can be helpful if the same function is used for filtration and action.</li>
+<li><code>value</code> (any type) - value of object's field that is being processed.</li>
+</ul>
+<p>Result of the action's execution is used as new value of the processed field.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+		<th>Argument</th>
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The object that should be processed.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>action</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+|
+
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>The action that should be executed for fields of the object.
+     Can be a function or an object with <code>execute</code> method.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Operation settings. Keys are settings names, values are corresponding settings values.
+    The following settings are supported:</p>
+<ul>
+<li><code>data</code> (any type; <code>undefined</code> by default) - any data that should be accessible during filtration or execution of action;
+ value of this setting is used as the 'data' field of the object that is passed into the filtration and action function.</li>
+<li><code>destination</code> (<code>Object</code>; newly created object by default) - reference to the object into which results of fields processing
+ should be saved;</li>
+<li><code>filter</code> (<code>Object</code>, <code>Function</code>, <code>Array</code> or <code>String</code>; <code>null</code> by default) - specifies which fields should be processed
+ (see <a href="module-teo.html#.test">test</a> for details); only fields for which <a href="module-teo.html#.test">test</a> function returns
+ true value will be processed; if this setting is not specified, all fields will be processed;</li>
+<li><code>exclusionFilter</code> (<code>Boolean</code>; <code>false</code> by default) - specifies whether fields not conforming to the filter
+ (see <code>filter</code> setting) should be copied into the result object;
+ true value of the setting specifies that such fields will not be copied into the result object;</li>
+<li><code>recursion</code> (<code>Boolean</code>; <code>false</code> by default) - specifies whether the function should be recursively applied to the fields
+ whose values are objects; true value of the setting specifies that for processing of such fields this function is used
+ instead of action;</li>
+<li><code>passValueInRecursion</code> (<code>Boolean</code>; <code>false</code> by default) - true value of the setting specifies that the object
+ that is value of the processed field is used as the destination object (as value of <code>destination</code> setting) in recursive call;</li>
+<li><code>rename</code> (<code>Object</code>; <code>null</code> by default) - specifies which fields should be renamed during processing;
+ fields are names of fields of the source object, their values are names of corresponding fields of the result object.</li>
+</ul></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+	<dt class="tag-see">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="module-teo.html#.test">test</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Result of source object's processing.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Object</span>
 
 
 	</dd>
@@ -1204,7 +1503,7 @@ I.e. the test object will be valid only when it has the same fields and values a
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a>
-		on 2015-07-19T15:38:24+03:00 using the <a
+		on 2015-09-18T23:03:59+03:00 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
