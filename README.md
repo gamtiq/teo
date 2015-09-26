@@ -1,10 +1,15 @@
 # teo
 
-Functions to test/check, filter, find and process objects.
+Functions to test/check, filter, find and process/transform objects.
 
 [![NPM version](https://badge.fury.io/js/teo.png)](http://badge.fury.io/js/teo)
 [![Build Status](https://secure.travis-ci.org/gamtiq/teo.png?branch=master)](http://travis-ci.org/gamtiq/teo)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+
+* [Usage](#usage)
+* [Examples](#examples)
+* [API](#api)
+* [Related projects](#related)
 
 ## Installation
 
@@ -36,7 +41,7 @@ Functions to test/check, filter, find and process objects.
 
 Use `dist/teo.js` or `dist/teo.min.js` (minified version).
 
-## Usage
+## Usage <a name="usage"></a>
 
 ### Node, Component, JSPM, SPM
 
@@ -88,7 +93,7 @@ define(["path/to/dist/teo.js"], function(teo) {
 </script>
 ```
 
-### Examples
+### Examples <a name="examples"></a>
 
 ```js
 teo.isObject(teo);   // true
@@ -104,6 +109,11 @@ teo.isEmpty(obj);   // false
 teo.isEmpty(obj, true);   // true
 
 teo.test({}, "true");   // true
+teo.test({}, "empty");   // true
+teo.test([], "empty");   // true
+teo.test(teo, "empty");   // false
+teo.test([0], "empty");   // false
+
 teo.test({}, {});   // true
 teo.test({a: 1}, {a: 2});   // false
 teo.test({a: 1, b: 2, c: 3, d: 4}, {c: 3, a: 1});   // true
@@ -134,6 +144,18 @@ teo.findItem(personList, function(person) {return person.age > 30 && ! person.ma
 teo.map({a: 1, b: 2, c: null, d: "delta", e: null, f: undefined},
         function(context) {return false;},
         {filter: {value: null}});          // {a: 1, b: 2, c: false, d: "delta", e: false, f: undefined}
+
+teo.map({a5: 1, b3: "center", c5: null, d: "delta", e8: -5, field9: 99, g99: -38},
+        null,
+        {
+            rename: function(context) {
+                var sField = context.field,
+                    match = sField.match(/^\w\d+$/);
+                return typeof context.value === "number" && match
+                            ? "n_" + match[0]
+                            : sField;
+            }
+        });   // {n_a5: 1, b3: "center", c5: null, d: "delta", n_e8: -5, field9: 99, n_g99: -38}
 
 
 function convert(context) {
@@ -183,7 +205,7 @@ teo.map({
 
 See tests for additional examples.
 
-## API
+## API <a name="api"></a>
 
 ### isObject(value): Boolean
 
@@ -216,6 +238,11 @@ Execute the specified action for fields of the object and return the object cont
 
 See `doc` folder for details.
 
+## Related projects <a name="related"></a>
+
+* [adam](https://github.com/gamtiq/adam)
+* [eva](https://github.com/gamtiq/eva)
+* [mixing](https://github.com/gamtiq/mixing)
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style.

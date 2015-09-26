@@ -86,6 +86,7 @@
      *   * A string. Describes one of the following supported checks:
      *      - `true` - test for true value i.e. value of `Boolean(obj)` will be returned
      *      - `false` - test for false value i.e. value of `! Boolean(obj)` will be returned
+     *      - `empty` - test for empty value i.e. `null`, `undefined`, `0`, empty object, empty array-like object or empty string
      *      - otherwise test for `obj == filter`
      *   * A function. Will be called to check the object which will be passed as the parameter into the function. 
      *     Result of the function call will be returned (i.e. result of `filter(obj)`).
@@ -104,7 +105,7 @@
      * @alias module:teo.test
      */
     function test(obj, filter) {
-        /*jshint eqeqeq:false*/
+        /*jshint eqeqeq:false, laxbreak:true, eqnull:true*/
         var sFilterType = typeof filter,
             context, value;
         if (sFilterType === "string") {
@@ -113,6 +114,12 @@
                     return Boolean(obj);
                 case "false":
                     return ! Boolean(obj);
+                case "empty":
+                    return obj == null
+                            || obj === 0
+                            || obj === ""
+                            || (typeof obj === "object"
+                                && (isEmpty(obj) || obj.length === 0));
                 default:
                     return obj == filter;
             }
@@ -233,14 +240,16 @@
     /**
      * Execute the specified action for fields of the object and return the object containing results of processing.
      * 
-     * The object with the following fields is passed as parameter into action and filter functions:
+     * The object with the following fields is passed as parameter into action, filter and renaming functions:
      * 
      * * `data` (any type) - any data that are accessible during filtration or execution of action;
      *      see `data` setting below.
      * * `field` (`String`) - name of object's field that is being processed.
      * * `obj` (`Object`) - reference to the object that is being processed.
-     * * `test` (`Boolean`) - specifies whether filtration or action is being executed;
-     *      this field can be helpful if the same function is used for filtration and action.
+     * * `rename` (`Boolean`) - specifies whether renaming is being executed;
+     *      this field can be helpful if the same function is used for filtration, renaming and/or action.
+     * * `test` (`Boolean`) - specifies whether filtration is being executed;
+     *      this field can be helpful if the same function is used for filtration, renaming and/or action.
      * * `value` (any type) - value of object's field that is being processed.
      * 
      * Result of the action's execution is used as new value of the processed field.
@@ -269,8 +278,10 @@
      *      instead of action;
      *   * `passValueInRecursion` (`Boolean`; `false` by default) - true value of the setting specifies that the object
      *      that is value of the processed field is used as the destination object (as value of `destination` setting) in recursive call;
-     *   * `rename` (`Object`; `null` by default) - specifies which fields should be renamed during processing;
-     *      fields are names of fields of the source object, their values are names of corresponding fields of the result object.
+     *   * `rename` (`Object` or `Function`; `null` by default) - specifies which fields should be renamed during processing;
+     *      if an object is specified, its fields are names of fields of the source object, their values are names
+     *      of corresponding fields of the result object; if a function is specified, its results will be used as field names
+     *      of the result object.
      * @return {Object}
      *      Result of source object's processing.
      * @alias module:teo.map
@@ -278,8 +289,8 @@
      */
     function map(source, action, settings) {
         var bFuncAction = typeof action === "function",
-            bChange, bExclusion, bNewDestin, bPassValueInRecursion, bRecursion, bRename, data, filter,
-            param, recursionSettings, renameMap, result, sField, value;
+            bChange, bExclusion, bNewDestin, bPassValueInRecursion, bRecursion, bRename, bRenameFunc, data, filter,
+            param, recursionSettings, rename, result, sField, sNewField, value;
         
         if (! settings) {
             settings = {};
@@ -297,12 +308,13 @@
                 }
             }
         }
-        renameMap = settings.rename || {};
+        rename = settings.rename || {};
+        bRenameFunc = typeof rename === "function";
         result = settings.destination || {};
         bNewDestin = source !== result;
         for (sField in source) {
             value = source[sField];
-            param = {data: data, field: sField, value: value, obj: source, test: false};
+            param = {data: data, field: sField, value: value, obj: source, rename: false, test: false};
             bChange = true;
             if (filter) {
                 param.test = true;
@@ -313,7 +325,7 @@
                     continue;
                 }
             }
-            bRename = sField in renameMap;
+            bRename = bRenameFunc || (sField in rename);
             if (bChange) {
                 if (bRecursion && typeof value === "object" && value !== null) {
                     recursionSettings.destination = bPassValueInRecursion ? value : {};
@@ -324,8 +336,24 @@
                     value = bFuncAction ? action(param) : action.execute(param);
                 }
             }
-            if (bNewDestin || bChange) {
-                result[ bRename ? renameMap[sField] : sField ] = value;
+            if (bNewDestin || bChange || (bRename && ! filter)) {
+                if (bRename) {
+                    if (bRenameFunc) {
+                        param.rename = true;
+                        sNewField = rename(param);
+                        param.rename = false;
+                    }
+                    else {
+                        sNewField = rename[sField];
+                    }
+                    if (sNewField === sField) {
+                        bRename = false;
+                    }
+                }
+                else {
+                    sNewField = sField;
+                }
+                result[sNewField] = value;
                 // Delete the processed field if the field was renamed in the source object
                 if (bRename && ! bNewDestin) {
                     delete source[sField];

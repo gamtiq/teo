@@ -240,6 +240,50 @@ describe("teo", function() {
             });
         });
         
+        describe("test(obj, 'empty')", function() {
+            it("should return true", function() {
+                var collection = {};
+                collection.length = 0;
+                collection.name = "list";
+                
+                expect( test(0, "empty") )
+                    .equal(true);
+                expect( test("", "empty") )
+                    .equal(true);
+                expect( test(undef, "empty") )
+                    .equal(true);
+                expect( test(null, "empty") )
+                    .equal(true);
+                expect( test({}, "empty") )
+                    .equal(true);
+                expect( test([], "empty") )
+                    .equal(true);
+                expect( test(collection, "empty") )
+                    .equal(true);
+            });
+            
+            it("should return false", function() {
+                var collection = {};
+                collection.length = 1;
+                collection.name = "list";
+                
+                expect( test(-10, "empty") )
+                    .equal(false);
+                expect( test("abc", "empty") )
+                    .equal(false);
+                expect( test({x: "y"}, "empty") )
+                    .equal(false);
+                expect( test(teo, "empty") )
+                    .equal(false);
+                expect( test([0], "empty") )
+                    .equal(false);
+                expect( test(numList, "empty") )
+                    .equal(false);
+                expect( test(collection, "empty") )
+                    .equal(false);
+            });
+        });
+        
         describe("test(obj, 'some string')", function() {
             it("should return true", function() {
                 expect( test("", "") )
@@ -1064,7 +1108,7 @@ describe("teo", function() {
                         }
                     }
                 };
-                expect( map(obj, change, {destination: obj, recursion: true, rename: {b: "obj", a: "astra", e: "last"}, filter: [excludeFieldFilter, null, ["e", "a"]]}) )
+                expect( map(obj, change, {destination: obj, recursion: true, rename: {b: "obj", a: "astra", d: "d", e: "last"}, filter: [excludeFieldFilter, null, ["e", "a"]]}) )
                     .eql({
                             a: 3,
                             obj: {
@@ -1137,6 +1181,95 @@ describe("teo", function() {
                                 }
                             }
                         });
+            });
+        });
+        
+        describe("map(source, action, {rename: renameFunc})", function() {
+            it("should change names of processed or copied fields according to results of renaming function", function() {
+                var obj, result;
+                
+                function process(data) {
+                    /*jshint laxbreak:true*/
+                    var bProcess = ! data.value;
+                    if (data.test) {
+                        return bProcess;
+                    }
+                    else if (data.rename) {
+                        return bProcess
+                                ? data.value
+                                : data.field;
+                    }
+                    return data.field;
+                }
+                
+                expect( map({
+                                a: null,
+                                b: {
+                                    c: 0,
+                                    d: "delphi"
+                                },
+                                e: false,
+                                f: 9,
+                                g: "js",
+                                h: 0
+                            },
+                            process,
+                            {
+                                filter: process,
+                                rename: process
+                            }) )
+                    .eql({
+                            "null": "a",
+                            b: {
+                                c: 0,
+                                d: "delphi"
+                            },
+                            "false": "e",
+                            f: 9,
+                            g: "js",
+                            "0": "h"
+                        });
+                
+                obj = {
+                    a: "abc",
+                    b: -3,
+                    c: {
+                        d: null,
+                        e: true,
+                        f: 8
+                    }
+                };
+                result = map(obj,
+                                changeToZero,
+                                {
+                                    destination: obj,
+                                    recursion: true,
+                                    passValueInRecursion: true,
+                                    filter: function(data) {
+                                        var value = data.value,
+                                            sType = typeof value;
+                                        return value && (sType === "number" || sType === "object");
+                                    },
+                                    rename: function(data) {
+                                        /*jshint laxbreak:true*/
+                                        return typeof data.value === "number"
+                                                    ? data.field + "0"
+                                                    : data.field;
+                                    }
+                                });
+                expect( result )
+                    .equal(obj);
+                expect( result )
+                    .eql({
+                            a: "abc",
+                            b0: 0,
+                            c: {
+                                d: null,
+                                e: true,
+                                f0: 0
+                            }
+                        });
+                
             });
         });
         
