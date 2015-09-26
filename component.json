@@ -2,7 +2,7 @@
   "name": "teo",
   "repo": "gamtiq/teo",
   "description": "Functions to test/check, filter, find and process/transform objects",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "keywords": [
     "test",
     "check",

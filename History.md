@@ -1,3 +1,8 @@
+### 0.3.0 / 2015-09-27
+
+* Improve renaming function of `map`.
+* Add test for empty value.
+
 ### 0.2.0 / 2015-09-18
 
 * Add `map` function to process/transform contents of objects.
